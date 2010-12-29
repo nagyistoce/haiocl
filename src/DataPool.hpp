@@ -7,13 +7,19 @@
 
 namespace Hai {
 
-  struct DataItem {
-	char ksrc[MAX_KERNEL_LEN];
-	uint32_t ksize;
-	uint32_t ikey;
-	deque<char> data;
-  
+  class DataItem {
+  protected:
+	char ksrc[MAX_KERNEL_LEN]_;
+	uint32_t ksize_;
+	uint32_t ikey_;
+	deque<char> data_;
+	Thread::mutex dmutex_;
+  public:
+	inline DataItem();
 	inline size_t getSize() { return data.size(); };
+	int getData(char* buf, uint32_t size) {
+	}
+	
   };
 
 
@@ -21,8 +27,7 @@ namespace Hai {
   public:
 	DataPool();
 	int createTask();
-	int pushData(uint32_t ikey);
-	int createDataItem();
+	const DataItem* getDataItem(uint32_t ikey);
   private:
 	
   };
