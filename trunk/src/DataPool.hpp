@@ -9,7 +9,7 @@ namespace Hai {
 
   class DataItem {
   protected:
-	char ksrc[MAX_KERNEL_LEN]_;
+	char ksrc_[MAX_KERNEL_LEN];
 	uint32_t ksize_;
 	uint32_t ikey_;
 	deque<char> data_;
