@@ -6,30 +6,14 @@
 #endif
 
 namespace Hai {
-
-  class DataItem {
-  protected:
-	char ksrc_[MAX_KERNEL_LEN];
-	uint32_t ksize_;
-	uint32_t ikey_;
-	deque<char> data_;
-	Thread::mutex dmutex_;
-  public:
-	inline DataItem();
-	inline size_t getSize() { return data.size(); };
-	int getData(char* buf, uint32_t size) {
-	}
-	
-  };
-
-
   class DataPool {
   public:
-	DataPool();
-	int createTask();
-	const DataItem* getDataItem(uint32_t ikey);
+    static DataPool* getInstance();
+    int createTask();
+    const DataItem* getDataItem(uint32_t ikey);
   private:
-	
+    DataPool();
+    static DataPool* pool;
   };
 }
 
