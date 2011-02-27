@@ -5,23 +5,38 @@
 #define MAX_KERNEL_LEN 10240
 #endif
 
+#include "common.hpp"
+
+
 namespace Hai {
   class DataItem {
   protected:
-    char ksrc[MAX_KERNEL_LEN]_;       // kernel src
-    uint32_t ksize_;                  // kernel src length
-    uint32_t ikey_;                   // map key
-    deque<char> data_;                // map func. data
-    Thread::mutex* dmutex_;            // mutex
+	// kernel source
+    char ksrc_[MAX_KERNEL_LEN];
+	
+	// kernel size
+    size_t ksize_;
+	
+	// map key
+    TKey ikey_;
+	
+    // map function data
+	deque<TRawData> data_;
+
+	// map mutex
+    Thread::mutex* dmutex_;
   public:
     // constructor
     DataItem();
-
+	~DataItem();
     // get the size of the data bunk
     size_t getDataSize();
 
     // fetch the data
     int getData(char* buf, uint32_t size);
+
+	// get the kernel source
+	TRET getKernelSrc(const char* kernel);
   };
 }
 

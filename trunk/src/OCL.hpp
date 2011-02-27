@@ -1,17 +1,8 @@
 #ifndef OCL_HPP
 #define OCL_HPP
 
-#ifndef OCL_MAX_DEVICE
-#define OCL_MAX_DEVICE 10
-#endif
-
-#ifndef OCL_MAX_CONTEXT
-#define OCL_MAX_CONTEXT 10
-#endif
-
-#ifndef OCL_MAX_QUEUE
-#define OCL_MAX_QUEUE 10
-#endif
+#include "common.hpp"
+#include <queue>
 
 extern "C" {
 #include <CL/opencl.h>
@@ -22,6 +13,11 @@ namespace Hai {
   public:
     static OCL* getInstance();
     static int freeInstance();
+
+	TRET initOCL();
+	TRET compileKernel(const char* ksrc, size_t ks, void* kbin);
+
+	
   private:
     OCL() {}
     ~OCL() {}
@@ -30,6 +26,7 @@ namespace Hai {
     cl_command_queue queue[OCL_MAX_QUEUE];
     cl_context       context[OCL_MAX_CONTEXT];
     static OCL* oclInstance;
+
   };
 }
 #endif
