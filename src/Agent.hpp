@@ -5,49 +5,52 @@ namespace Hai {
   class Agent : Thread {
   public:
 	enum AgentStatus {
-	  AGENT_HAS_NO_TASK = 0,
+	  AGENT_HAS_NO_DATA = 0,
+	  AGENT_IS_BUSY = 1
 	};
 	
 	inline Agent(DataPool* datapool, OCL* ocl, uint32_t bufsize)
 	  : ikey_(0u), datapool(datapool_),
-		ocl_(ocl), status_(0), bufsize_(bufsize) {
+		ocl_(ocl), status_(0), bsize_(bufsize) {
 	}
 	
+	
 	int run() {
-	  int ret;
-	  // create agent
-	  if (status_ == STATUS_NO_AGENT_RUNNING) {
-		ret = datapool_ -> createTask(&ikey_);
-		if (ret) {
-		  // TODO:
+	  TRET ret;
+
+	  void* kernel;
+	  ret = ocl_ -> compileKernel(dataitem_ -> getKSrc(),
+								  dataitem_ -> getKSize(),
+								  kernel);
+	  
+	  while( 1 ) {
+		ret = dataitem_ -> getData(data_buf_, bsize);
+		if (ret != HAI_SUCCESS) {
 		}
 
-		ocl -> registerAgent();
+		ret = ocl_ -> setTask(kernel. databuf_, bsize_);
 	  }
-
-	  // fetch data
-	  const DataItem* di = datapool_ -> getDataItem(ikey_);
-	  ret = di -> getData(databuf_, bufsize_);
-	  if (ret != 0) {
-		// TODO:
-	  }
-
-	  // push for data
-	  
-	  
 	}
 
-	inline int setBufferSize(uint32_t bufsize) {
-	  bufsize_ = bufsize;
+	inline int setBufferSize(size_t bufsize) {
+	  bsize_ = bufsize;
 	}
 
   protected:
-	DataPool* datapool_;
+	DataItem* dataitem_;
 	OCL* ocl_;
+
+	// agent status
 	AgentStatus status_;
-	uint32_t ikey_;
-	char* databuf_;
-	uint32_t bufsize_;
+
+	// associated map key
+	TKEY ikey_;
+
+	// data to be processed
+	TRawData* databuf_;
+
+	// data size
+	size_t bsize_;
   };
 }
 #endif
