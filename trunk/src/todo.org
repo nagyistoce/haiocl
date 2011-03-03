@@ -1,5 +1,14 @@
 
 * TODOs
 ** TODO design a serialization way of transfering data
+* DataItem
 
+* DataPool
 
+* AgentPool
+
+* Agent
+
+* OCL
+
+* Hai

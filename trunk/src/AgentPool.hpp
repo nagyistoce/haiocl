@@ -2,14 +2,20 @@
 #define AGENT_POOL_HPP
 
 #include <map>
+#include "common.hpp"
 
 namespace Hai {
   class AgentPool {
   public:
+	// -- instance mgt -------------------------
 	static AgentPool* getInstance();
 	static int freeInstance();
 
-	int createNewAgent();
+	// -- method -------------------------
+	/*
+	 * create a new agent
+	 */
+	int createNewAgent(TKEY);
 	
   private:
 	AgentPool();
