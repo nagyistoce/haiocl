@@ -37,6 +37,10 @@ namespace Hai {
 
 	// get the kernel source
 	TRET getKernelSrc(const char* kernel);
+
+	// push data into the container
+	
+	
   };
 }
 

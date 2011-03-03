@@ -2,9 +2,12 @@
 #define HAI_COMMON_HPP
 
 #include <cstdint>
-#define TKEY uint32_t
-#define TRET int
-#define TRawData void*
+#include <cstdio>
+using namespace std;
+
+#define TKey uint32_t
+#define TRet int
+#define TBinData char
 
 #ifndef OCL_MAX_DEVICE
 #define OCL_MAX_DEVICE 10
@@ -18,5 +21,10 @@
 #define OCL_MAX_QUEUE 10
 #endif
 
+#ifndef MAX_KERNEL_LEN
+#define MAX_KERNEL_LEN 10240
+#endif
+
+#define log cout
 
 #endif
