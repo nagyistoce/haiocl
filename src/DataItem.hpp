@@ -9,7 +9,7 @@
 
 
 namespace Hai {
-  class DataItem {
+  class DataItem : public GeneralSerializer {
   protected:
 	// kernel source
     char ksrc_[MAX_KERNEL_LEN];
@@ -39,7 +39,7 @@ namespace Hai {
 	TRET getKernelSrc(const char* kernel);
 
 	// push data into the container
-	
+	TRet pushData(TBinData* data, size_t size);
 	
   };
 }

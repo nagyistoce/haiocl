@@ -5,9 +5,9 @@
 #include <cstdio>
 using namespace std;
 
-#define TKey uint32_t
-#define TRet int
-#define TBinData char
+#define TKey uint32_t            /* Map Key Type */
+#define TRet int                 /* Function return type */
+#define TBinData char            /* Raw binary data type */
 
 #ifndef OCL_MAX_DEVICE
 #define OCL_MAX_DEVICE 10

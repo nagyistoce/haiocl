@@ -15,43 +15,22 @@ namespace Hai {
     static OCL* getInstance();
     static int freeInstance();
 
-	struct OCLMap {
-	  // -- NDRange parameters ----------------------------
-	  cl_kernel* kernel;
-	  cl_uint work_dim;
-	  size_t* global_work_offset;
-	  size_t* global_work_size;
-	  size_t* local_work_size;
-	  cl_uint num_events_in_wait_list;
-	  const cl_event* event_wait_list;
-	  cl_event *event;
-
-	  // --inputs and outputs ------------------------------
-	  cl_mem in_binary;
-	  cl_mem in_schema;
-	  cl_mem in_size;
-
-	  cl_mem out_binary;
-	  cl_mem out_schema;
-	  cl_mem out_size;
-	  
-	  // -- callback func ----------------------------------
-	  OCLKernelCallBack kcb;
-	  OCLMemoryDescBack mdb;
-
-	  OCLMap();
-	};
-
 	TRet initOCL();
 	TRet compileKernel(const char* ksrc, size_t ks, void* kbin);
-
 	
   private:
     OCL() {}
     ~OCL() {}
+
+	// -- OpenCL Context -------------------------------------
 	struct CL_Context {
 	};
-	
+
+	// -- OpenCL Devices -------------------------------------
+	enum Device_Status {
+	  FREE = 0, BUSY = 1
+	}
+	  
 	struct CL_Device {
 	  cl_uint address_bits;
 	  cl_bool device_available;
@@ -63,14 +42,32 @@ namespace Hai {
 	  cl_ulong global_mem_cache_type;
 	  cl_uint global_mem_cacheline_size;
 	  cl_ulong global_mem_size;
+	  
 	  // TODO: to fill the complete fields
-
-
 	  cl_device_id id;
 	  inline CL_Device(cl_device_id _id) : id(_id) {}
 	  inline cl_int init() {}
 	};
+
+	//TO Improve: instead of using device, make it an abstract resource
+	Device_Status status_[OCL_MAX_PLATFORM][OCL_MAX_DEVICE];
 	
+	inline Device_status getDeviceStatus(unsigned int pid, unsigned int did) {
+	  return status[pid][did];
+	}
+
+	inline void setDeviceStatusBusy(unsigned int pid, unsigned int did) {
+	  status[pid][did] = BUSY;
+	}
+
+	inline void setDeviceStatusFree(unsigned int pid, unsigned int did) {
+	  status[pid][did] = FREE;
+	}
+	
+	inline TRet getNextFreeDevice(cl_device_id* device_id) {
+	}
+	
+	// -- CL_Platform -------------------------------------
 	struct CL_Platform {
 	  char profile[MAX_CL_INFO];
 	  char version[MAX_CL_INFO];
@@ -100,10 +97,17 @@ namespace Hai {
 	cl_uint          nDevice[OCL_MAX_PLATFORM];
 	cl_uint          nQueue;
 	cl_uint          nContext;
-	
+
 	// -- Map class definition -------------------------------------
-	// -- Number of Instance ---------------------------------------
+	queue<OCLTask>  taskQueue;
+	
+	// -- Everything static  ---------------------------------------
     static OCL* oclInstance;
+
+	/**
+	 * taskCallBack() : callback function for OpenCL kernels
+	 */
+	static void taskCallBack();
   };
 }
 #endif
