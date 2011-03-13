@@ -1,3 +1,16 @@
+/*================================================================================
+ *
+ * Agent.hpp
+ *
+ * Author:
+ *   Si Yin <zyzyis@gmail.com>
+ *
+ * Copyright (C) 2011 Hai Computing
+ *
+ * This file is released under the terms of the GNU General Public License
+ * versions 3.0. Please refers to the file COPYING for more information.
+ *================================================================================
+ */
 #ifndef AGENT_HPP
 #define AGENT_HPP
 
@@ -9,26 +22,53 @@ namespace Hai {
 	  AGENT_IS_BUSY = 1
 	};
 	
-	inline Agent(DataPool* datapool, OCL* ocl, uint32_t bufsize)
-	  : ikey_(0u), datapool(datapool_),
-		ocl_(ocl), status_(0), bsize_(bufsize) {
+	inline Agent()
+	  : thread_run_flag(true) {
 	}
-	
+
+	TRet init() {
+	  TRet ret;
+	  OCL* ocl = OCL::getInstance();
+
+	  // initialize the kernel
+	  if (kernel_ == null) {
+		ret = ocl -> compileKernel(dataitem -> getKSrc(),
+								   dataitem -> getKSize(),
+								   kernel_);
+	  }
+
+	}
 	
 	int run() {
 	  TRET ret;
+	  OCLSon* oclson;
+	  OCL* ocl = OCL::getInstance();
+	  OCLTask* ocltask;
 
-	  void* kernel;
-	  ret = ocl_ -> compileKernel(dataitem_ -> getKSrc(),
-								  dataitem_ -> getKSize(),
-								  kernel);
-	  
-	  while( 1 ) {
-		ret = dataitem_ -> getData(data_buf_, bsize);
-		if (ret != HAI_SUCCESS) {
+	  while( thread_end_flag ) {
+		if (dataitem -> hasEnoughData(dsize)) {
+		  wait();
+		}
+		
+		ret = dataitem_ -> getData(databuf_, dsize);
+		if (ret) {
+		}
+		
+		oclson = dataitem_ -> serializeToOCLSON(databuf_, dsize, &ret);
+		if (ret) {
 		}
 
-		ret = ocl_ -> setTask(kernel. databuf_, bsize_);
+		ocltask = ocl -> createOCLTask(oclson, ret);
+		if (ret) {
+		}
+
+		tret = ocltask -> setOutputKey(okey);
+		if (ret) {
+		}
+		
+		ret = ocl -> pushOCLTask(oclson);
+		if (ret) {
+		}
 	  }
 	}
 
@@ -36,21 +76,30 @@ namespace Hai {
 	  bsize_ = bufsize;
 	}
 
+
   protected:
+	PThread::TCondVar cond_var;
+	PThread::TMutex   mutex;
+
 	DataItem* dataitem_;
-	OCL* ocl_;
 
 	// agent status
 	AgentStatus status_;
 
-	// associated map key
-	TKEY ikey_;
+	// associated map input key
+	TKey mkey_;
 
+	// associated map output keys
+	TKey okey[1];
+	
 	// data to be processed
-	TRawData* databuf_;
+	TRawData databuf_[MAX_DATA_SIZE];
 
 	// data size
-	size_t bsize_;
+	size_t dsize_;
+
+	// check if thread is still running
+	bool thread_run_flag;
   };
 }
 #endif
