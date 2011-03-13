@@ -1,3 +1,17 @@
+/*================================================================================
+ *
+ * OCL.hpp
+ *
+ * Author:
+ *   Si Yin <zyzyis@gmail.com>
+ *
+ * Copyright (C) 2010 Hai Computing
+ *
+ * This file is released under the terms of the GNU General Public License
+ * versions 3.0. Please refers to the file COPYING for more information.
+ *================================================================================
+ */
+
 #ifndef OCL_HPP
 #define OCL_HPP
 
@@ -37,7 +51,9 @@ namespace Hai {
 	  cl_bool compiler_available;
 	  cl_bool endian_little;
 	  cl_bool correction_support;
+
 	  char extensions[MAX_CL_INFO];
+
 	  cl_ulong global_mem_cache_size;
 	  cl_ulong global_mem_cache_type;
 	  cl_uint global_mem_cacheline_size;
