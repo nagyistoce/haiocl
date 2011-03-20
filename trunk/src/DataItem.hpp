@@ -19,6 +19,7 @@
 
 
 namespace Hai {
+  template<Thread_T>
   class DataItemAbstract : public GeneralSerializer {
   protected:
 	// kernel source
@@ -34,10 +35,10 @@ namespace Hai {
 	deque<TRawData> data_;
 
 	// thread mutex
-	PThread::TMutex mutex_;
+	Thread_T::TMutex mutex_;
 
 	// thread conditional variable
-	PThread::TCondVar cond_var_;
+	Thread_T::TCondVar cond_var_;
 	
   public:
     // constructor
@@ -54,24 +55,27 @@ namespace Hai {
 	}
 	
 	inline ~DataItemAbstract() {
-	  PThread::destoryMutex(mutex_);
-	  PThread::destoryCondVar(cond_var_);
+	  Thread_T::destoryMutex(mutex_);
+	  Thread_T::destoryCondVar(cond_var_);
 	}
 	
     // get the total size of the data bunk
-    size_t getDataSize();
+    inline size_t getDataSize() {
+		return data_.size();
+	}
 
     // fetch the data
     inline size_t getData(char* buf, size_t size) {
 	  assert(buf != NULL);
-	  
+	  // TODO:
+	  Thread_T::lockMutex(mutex_);
 	}
 
 	// get the kernel source
 	inline const char* getKernelSrc(size_t* ksize) {
 	  *kize = ksize_;
 	  return static_cast<const char*>ksrc_;
-	};
+	}
 
 	// push data into the container
 	inline TRet pushData(TBinData* data, size_t size) {

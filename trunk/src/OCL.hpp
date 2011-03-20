@@ -68,7 +68,7 @@ namespace Hai {
 	//TO Improve: instead of using device, make it an abstract resource
 	Device_Status status_[OCL_MAX_PLATFORM][OCL_MAX_DEVICE];
 	
-	inline Device_status getDeviceStatus(unsigned int pid, unsigned int did) {
+	inline Device_Status getDeviceStatus(unsigned int pid, unsigned int did) {
 	  return status[pid][did];
 	}
 
