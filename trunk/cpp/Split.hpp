@@ -1,6 +1,6 @@
 /*================================================================================
  *
- * GeneralSerializer.hpp
+ * Split.hpp
  *
  * Author:
  *   Si Yin <zyzyis@gmail.com>
@@ -15,10 +15,16 @@
 #ifndef SPLIT_T
 #define SPLIT_T
 
+#include "Common.hpp"
+#include "io/io.hpp"
+
 struct Split {
-	TRawData* binData;
-	size_t* schema;
-	size_t size;
+  void*     kernel;     // input kernel
+  TKey      in_key;     // Map key
+  TRawData* in_dat;     // input binary data
+  ushort*   in_schema;  // input schema description 
+  size_t    in_size;    // input data size
+  size_t    out_size;   // output data size
 };
 
 
