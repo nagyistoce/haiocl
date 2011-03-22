@@ -15,12 +15,12 @@
 #ifndef DATA_ITEM_HPP
 #define DATA_ITEM_HPP
 
-#include "common.hpp"
+#include "Common.hpp"
 
 
 namespace Hai {
-  template<Thread_T>
-  class DataItemAbstract : public GeneralSerializer {
+  template<Thread_T, OCLType>
+  class DataItemAbstract {
   protected:
 	// kernel source
     char ksrc_[OCL::Common::MAX_KERNEL_LEN];
@@ -68,7 +68,7 @@ namespace Hai {
     inline size_t getData(char* buf, size_t size) {
 	  assert(buf != NULL);
 	  // TODO:
-	  Thread_T::lockMutex(mutex_);
+	  // Thread_T::lockMutex(mutex_);
 	}
 
 	// get the kernel source

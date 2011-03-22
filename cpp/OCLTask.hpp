@@ -1,3 +1,16 @@
+/*================================================================================
+ *
+ * OCLTask.hpp
+ *
+ * Author:
+ *   Si Yin <zyzyis@gmail.com>
+ *
+ * Copyright (C) 2011 Hai Computing
+ *
+ * This file is released under the terms of the GNU General Public License
+ * versions 3.0. Please refers to the file COPYING for more information.
+ *================================================================================
+ */
 #ifndef HAI_TASK_HPP
 #define HAI_TASK_HPP
 
