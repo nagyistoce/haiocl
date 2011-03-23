@@ -32,12 +32,25 @@
 #define HAI_OCL_MAX_CONTEXT    10
 #define HAI_OCL_SPLITS_SIZE    30
 
-// ------- log & error -------------
-#ifdef _DEBUG
-#define log(format, content) printf(format, content)
-#else
-#define log(format, content)
+// ------- general ----------------
+#ifndef DEFAULT_DEVICE_TYPE
+#define DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
 #endif
 
+// ------- log & error -------------
+#ifdef _DEBUG
+#define HAI_LOG(format, msg) \
+  log_("Log", format, msg)
+
+#define log_(type, format, msg)                   \
+  printf("#type %s, %4d: ", __FILE__, __LINE__);  \
+  printf(format, msg);                            \
+  puts("");
+
+#else
+#define HAI_LOG(format, msg)
+#endif
+
+#define CHK_RET(ret)
 
 #endif

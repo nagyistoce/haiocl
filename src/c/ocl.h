@@ -54,13 +54,14 @@ typedef struct ocl_scheduler {
   // -- Number of OpenCL env. ------------------------
   uint32_t         nPlatform;
   uint32_t         nDevice[OCL_MAX_PLATFORM];
-  uint32_t         nQueue;
+  uint32_t         nQueue[OCL_MAX_PLATFORM];
   uint32_t         nContext;
   
   // -- Thread information ---------------------------
-  thread_id_t     tid;
-  mutex_t         tmutex;
-  cond_t          tcond;
+  thread_id_t     ocl_id;
+  mutex_t         res_mutex;
+  cond_t          res_cond;
+  uint32_t        nres;
 } ocl_scheduler_t;
 
 int ocl_scheduler_init(ocl_scheduler_t*);
