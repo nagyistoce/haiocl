@@ -1,6 +1,6 @@
 /*==========================================================================
  *
- * ocl.h
+ * scheduler.h
  *
  * Author:
  *   Si Yin <zyzyis@gmail.com>
@@ -11,33 +11,11 @@
  * versions 3.0. Please refers to the file COPYING for more information.
  *==========================================================================
  */
-#ifndef HAI_OCL_H
-#define HAI_OCL_H
+#ifndef HAI_SCHEDULER_H
+#define HAI_SCHEDULER_H
 
 
 #include <CL/opencl.h>
-
-typedef struct ocl_split {
-  // -- kernel properties -------------
-  cl_kernel* kernel;
-  cl_uint work_dim;
-  size_t* global_work_offset;
-  size_t* global_work_size;
-  size_t* local_work_size;
-  cl_uint num_events_in_wait_list;
-  const cl_event* event_wait_list;
-  cl_event *event;
-	
-  // --inputs and outputs memory objects -------------
-  cl_mem in_binary;
-  cl_mem in_schema;
-  cl_mem in_size;
-	
-  cl_mem out_binary;
-  cl_mem out_schema;
-  cl_mem out_size;
-  
-} ocl_split_t;
 
 
 typedef struct ocl_scheduler {
