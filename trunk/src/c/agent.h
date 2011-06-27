@@ -13,8 +13,8 @@
  */
 
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef HAI_AGENT_H
+#define HAI_AGENT_H
 
 #include "common.h"
 #include <pthread.h>
@@ -24,13 +24,12 @@
 #define cond_t          pthread_cond_t  
 
 
-typedef struct agent_t {
+typedef struct hai_agent_t {
   // --- agent basic information --------
   void*       map_kernel;
   char*       map_kernel_src;
   map_key_t   in_key;
-  map_key_t*  out_key;
-  int         out_len;
+  map_key_t   out_key;
   
   // --- runtime information --------
   int         weight;
@@ -41,10 +40,9 @@ typedef struct agent_t {
 };
 
 
-int agent_compile_kernel(agent_t* agent);
-int agent_init_thread();
+int agent_compile(agent_t* agent);
+int agent_init();
 int agent_start();
 int agent_stop();
-
 #endif
 
