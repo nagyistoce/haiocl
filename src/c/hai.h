@@ -28,8 +28,8 @@ int haiocl_exit();
 // ------------------------------------------------------------
 // global variables
 // ------------------------------------------------------------
-agent_t*         hai_agents;
-key_table_t*     hai_table;
-ocl_scheduler_t* ocl_scheduler;
-ocl_split_t*     ocl_splits;
+hai_agent_t*         agents;
+key_table_t*     	 keytable;
+hai_scheduler_t* 	 scheduler;
+hai_qsplit_t*     	 splits_queue;
 #endif
