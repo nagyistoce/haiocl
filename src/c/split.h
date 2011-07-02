@@ -37,11 +37,40 @@ typedef struct hai_kernel_data {
   cl_mem out_size;
 } hai_kernel_data_t;
 
-
 typedef struct hai_split {
   hai_kernel_prop* kernel_prop;
   hai_kernel_data_t* kernel_data;
   hai_workdag_t* dag;
 } hai_split_t;
+
+/**
+ * Splitqueue item type by using linklist
+ */
+typedef struct hai_splitqueue_item {
+  struct hai_splitqueu_item* next;
+  hai_split* split;
+} hai_splitqueue_item_t;
+
+/**
+ * Splitqueue type
+ */
+typedef struct hai_splitqueue {
+  struct hai_splitqueue* head;
+  struct hai_splitqueue* tail;
+  uint32_t length;
+} hai_splitqueue_t;
+
+inline
+int hai_splitqueue_push( hai_splitqueue_t* queue, 
+                         hai_split_t*  split,
+                         hai_thread_mutex* mutex) {
+  if (length == 0) {
+  }
+}
+
+inline
+hai_split_t* hai_splitqueue_pop( hai_splitqueue_t* queue,
+                                 hai_thread_mutex* mutex) {
+}
 
 #endif
