@@ -36,6 +36,9 @@
 #ifndef DEFAULT_DEVICE_TYPE
 #define DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
 #endif
+#ifndef DEFAULT_KEYTABLE_SIZE
+#define DEFAULT_KEYTABLE_SIZE 1024
+#endif
 
 // ------- log & error -------------
 #ifdef _DEBUG

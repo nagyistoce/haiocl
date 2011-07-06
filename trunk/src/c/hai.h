@@ -22,14 +22,29 @@
 #include "ocl.h"
 
 
-int haiocl_init();
-int haiocl_exit();
+inline int haiocl_init() {
+}
+
+inline int haiocl_exit() {
+  exit(1);
+}
 
 // ------------------------------------------------------------
 // global variables
 // ------------------------------------------------------------
-hai_agent_t*         agents;
-key_table_t*     	 keytable;
-hai_scheduler_t* 	 scheduler;
-hai_qsplit_t*     	 splits_queue;
+typedef struct g_state {
+  hai_agent_t*       agents;
+  key_table_t*     	 keytable;
+  uint32_t           kt_size;
+  hai_scheduler_t* 	 scheduler;
+  hai_qsplit_t*      splits_queue;
+} g_state_t;
+
+inline int g_state_init(g_state_t* p) {
+  p -> kt_size = DEFAULT_KEYTABLE_SIZE;
+  keytable = (key_table_t*)malloc(sizeof(key_table_t) * p -> kt_size);
+}
+
+inline int g_state_release(g_state_t* p) {
+}
 #endif
