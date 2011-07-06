@@ -24,22 +24,22 @@
 typedef uint64_t uid_t;
 
 typedef struct map_key_t {
-  uid_t* 	uid;
-  uint32_t  size;
+  uid_t 	uid;
 } map_key_t;
 
 // ----------------------------------------------------------
 // hash_node_t
 // ----------------------------------------------------------
-typedef struct hai_hash_node {
+typedef struct hai_buf_node {
   uid_t			uid;
   raw_data_t*	phead;
   raw_data_t*	ptail;
   uint32_t     	size;
   mutex_t    	mutex;
-} hai_hash_t;
+} hai_buf_node_t;
 
 typedef hai_hash_node_t* key_table_t;
+
 // ----------------------------------------------------------
 // raw_data_t
 // ----------------------------------------------------------
@@ -52,8 +52,9 @@ typedef struct raw_data {
 
 // ----------------------------------------------------------
 // hai_keytable_init
+// Initialize the keytable
 // ----------------------------------------------------------
-int   hai_keytable_init(void*);
+int hai_keytable_init();
 
 // ----------------------------------------------------------
 // hai_keytable_init
@@ -68,6 +69,6 @@ uid_t hai_keytable_generate();
 // ----------------------------------------------------------
 // hai_keytable_init
 // ----------------------------------------------------------
-int	  hai_keytable_insert(uid_t uid, binary_t data);
+int	hai_keytable_insert(uid_t uid, binary_t data);
 
 #endif
