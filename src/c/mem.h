@@ -93,15 +93,31 @@ int hai_keytable_init_(key_table keytable, uint32_t size) {
 void* hai_keytable_search(uid_t uid)
 
 // ----------------------------------------------------------
-// hai_keytable_init
+// hai_keytable_insert_data()
+//
+// Insert binary data into the linked list in the key table.
+// By design there is only 1 thread which can access the node
+// so that no multithreading is possible.
+//
+// Parameter:
+//   uid - unique key value
+//   binary_t - serialized binary data
+// Return:
+//   0 - good otherwise failed
 // ----------------------------------------------------------
-uid_t hai_keytable_generate_key();
+#define	hai_keytable_insert_data(uid, data) \
+  hai_keytable_insert_data_(uid, data, g_state -> keytable)
 
-// ----------------------------------------------------------
-// hai_keytable_init
-// ----------------------------------------------------------
-inline 
-int	hai_keytable_insert_data(uid_t uid, binary_t data) ;
+inline
+int hai_keytable_insert_data_(uid_t uid, binary_t data, key_table_t keytable) {
+  uid_t index = hai_keytable_search(uid);
+  key_node_t* pnode = keytable -> nodes[index];
+  if (pnode -> size == 0) {
+    // empty list
+    
+  }
+}
+
 
 
 // ----------------------------------------------------------

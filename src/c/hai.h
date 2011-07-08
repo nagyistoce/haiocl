@@ -43,15 +43,11 @@ typedef struct g_state {
 
 inline int g_state_init(g_state_t* p) {
   int ret;
-  ret = hai_keytable_init(p -> keytable);
-  p -> kt_size = ret;
+  ret = hai_keytable_init(p -> keytables);
+  CHK_RET(ret);
 
   ret = hai_scheduler_init(p -> scheduler);
   CHK_RET(ret);
-
-  ret = hai_splitqueue_init(p -> splits_queue);
-  CHK_RET(ret);
-  
 
   return 0;
 }
