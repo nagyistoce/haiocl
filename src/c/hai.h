@@ -32,17 +32,28 @@ inline int haiocl_exit() {
 // ------------------------------------------------------------
 // global variables
 // ------------------------------------------------------------
-typedef struct g_state {
-  hai_agent_t*       agents;
-  key_table_t*     	 keytable;
-  uint32_t           kt_size;
-  hai_scheduler_t* 	 scheduler;
-  hai_qsplit_t*      splits_queue;
+typedef struct g_state {  
+  hai_agent_t*       agents;                  // all the agents pointers
+  hai_key_table_t  	 keytable;                // all the map keys
+  hai_scheduler_t* 	 scheduler;               // scheduler pointer
+  hai_qsplit_t*      splits_queue;            // splits queues
+
+  uint32_t           kt_capacity;             // key table length
 } g_state_t;
 
 inline int g_state_init(g_state_t* p) {
-  p -> kt_size = DEFAULT_KEYTABLE_SIZE;
-  keytable = (key_table_t*)malloc(sizeof(key_table_t) * p -> kt_size);
+  int ret;
+  ret = hai_keytable_init(p -> keytable);
+  p -> kt_size = ret;
+
+  ret = hai_scheduler_init(p -> scheduler);
+  CHK_RET(ret);
+
+  ret = hai_splitqueue_init(p -> splits_queue);
+  CHK_RET(ret);
+  
+
+  return 0;
 }
 
 inline int g_state_release(g_state_t* p) {
