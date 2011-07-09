@@ -23,8 +23,13 @@
 #define HAI_MAX_AGENTS     20
 
 // ------- mem.h -------------------
-#define HAI_DATA_TRUNK_LEN 41960
+#ifndef DEFAULT_KEYTABLE_SIZE
+#define DEFAULT_KEYTABLE_SIZE 1024           // 1K initial key size length
+#endif
 
+#define HAI_DATA_TRUNK_LEN 41960
+#ifndef HAI_DEFAULT_NODE_SIZE 10240          // 10K for each node size
+#endif
 
 // ------- ocl.h -------------------
 #define HAI_OCL_MAX_DEVICE     10
@@ -35,9 +40,6 @@
 // ------- general ----------------
 #ifndef DEFAULT_DEVICE_TYPE
 #define DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
-#endif
-#ifndef DEFAULT_KEYTABLE_SIZE
-#define DEFAULT_KEYTABLE_SIZE 1024
 #endif
 
 // ------- log & error -------------
