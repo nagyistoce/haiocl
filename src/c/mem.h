@@ -32,9 +32,10 @@ typedef struct {
 // ----------------------------------------------------------
 typedef char* binary_t;
 typedef struct {
-	struct raw_data_t* 	next;
-	binary_t 			pdata;
-	size_t				size;
+  bin_node_t* 	next;
+  binary_t 		pdata;
+  size_t		size;
+  size_t        capacity;
 } bin_node_t;
 
 // ----------------------------------------------------------
@@ -42,8 +43,8 @@ typedef struct {
 // ----------------------------------------------------------
 typedef struct {
   uid_t			uid;
-  raw_data_t*	phead;
-  raw_data_t*	ptail;
+  bin_node_t*	phead;
+  bin_node_t*	ptail;
   uint32_t     	size;
   mutex_t    	mutex;
 } key_node_t;
@@ -90,7 +91,11 @@ int hai_keytable_init_(key_table keytable, uint32_t size) {
 // ----------------------------------------------------------
 // hai_keytable_init
 // ----------------------------------------------------------
-void* hai_keytable_search(uid_t uid)
+#define hai_keytable_search(x) hai_keytable_search_(x, g_state -> keytable)
+inline
+key_node_t* hai_keytable_search_(uid_t uid, key_table_t keytable) {
+  return keytable -> nodes[uid];
+}
 
 // ----------------------------------------------------------
 // hai_keytable_insert_data()
@@ -100,8 +105,9 @@ void* hai_keytable_search(uid_t uid)
 // so that no multithreading is possible.
 //
 // Parameter:
-//   uid - unique key value
+//   uid      - unique key value
 //   binary_t - serialized binary data
+//   bsize    - data size in bytes
 // Return:
 //   0 - good otherwise failed
 // ----------------------------------------------------------
@@ -109,16 +115,21 @@ void* hai_keytable_search(uid_t uid)
   hai_keytable_insert_data_(uid, data, g_state -> keytable)
 
 inline
-int hai_keytable_insert_data_(uid_t uid, binary_t data, key_table_t keytable) {
-  uid_t index = hai_keytable_search(uid);
+int hai_keytable_insert_data_(uid_t uid, binary_t data, size_t bsize, 
+                              key_table_t keytable) {
+  uid_t index = hai_keytable_search_(uid, keytable);
   key_node_t* pnode = keytable -> nodes[index];
+  bin_node_t* ptmp;
   if (pnode -> size == 0) {
-    // empty list
-    
+    pnode -> phead -> pdata = (bin_node_t*)malloc(sizeof(bin_node_t));
+    ptmp = pnode -> phead;
+    pnode -> phead -> capacity = HAI_DEFAULT_NODE_SIZE;
+    pnode -> phead -> 
+    pnode -> size = 1;
+    pnode -> ptail = pnode -> phead;
   }
+
 }
-
-
 
 // ----------------------------------------------------------
 // hai_keytable_insert_key()
@@ -145,6 +156,7 @@ int hai_keytable_insert_key_(uid_t uid, hai_key_table_t keytable) {
 
   uint32_t last_i = keytable -> size - 1;
   keytable -> nodes[last_i + 1] = keytable -> nodes[last_i] + 1;
+  keytable -> size ++;
   return 0;
 }
 #endif
