@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 // ------- agent.h -------------------
-#define HAI_MAX_KEY_LEN    100
+#define HAI_MAX_INIT_LEN    100
 #define HAI_MAX_KERNEL_LEN 10240
 #define HAI_MAX_AGENTS     20
 
