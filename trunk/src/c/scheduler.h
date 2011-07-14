@@ -55,12 +55,28 @@ int hai_scheduler_init(ocl_scheduler_t*);
  */
 int hai_scheduler_release(ocl_sheduler_t*);
 
+inline
+int is_scheduler_stopped(hai_scheduler_t* scheduler) {
+  return scheduler -> status == 1;
+}
+
+inline
+int chk_condition() {
+}
 
 inline
 int hai_scheduler_run(ocl_scheduler_t* sheduler) {
-  thread_mutex_lock( scheduler -> wmutex );
-  while ( scheduler -> status != HAI_SCHEDULER_STOP ) {
+  uint32_t rid;
+  bin_node_t* bnode;
+  pthread_mutex_lock( scheduler -> wmutex );
+  
+  while ( should_i_stop(scheduler) ) {
     pthread_cond_wait( &(scheduler -> wcond), &(scheduler -> wmutex) );
+        
+    rid = hai_scheduler_get_empty_resource( scheduler );
+    bnode = hai_keytable_pop(uid);
+    hai_scheduler_go(rid, bnode);
+    hai_scheduler_disable(rid);
   }
   return 0;
 }

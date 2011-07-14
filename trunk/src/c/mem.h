@@ -48,6 +48,7 @@ typedef struct {
   uint32_t          nobj;       // number of object in the node
   size_t            ssize;      // size of the object in bytes
   thread_mutex_t    mutex;      // thread mutex
+  void*             pkernel;
 } key_node_t;
 
 // ----------------------------------------------------------

@@ -1,6 +1,6 @@
 /*==========================================================================
  *
- * hai.h
+ * agent.h
  *
  * Author:
  *   Si Yin <zyzyis@gmail.com>
@@ -13,21 +13,15 @@
  */
 
 
-#ifndef HAI_AGENT_H
-#define HAI_AGENT_H
+#ifndef HAI_KERNEL_H
+#define HAI_KERNEL_H
 
 #include "common.h"
-#include <pthread.h>
 
-#define thread_id_t     int
-#define mutex_t         pthread_mutex_t
-#define cond_t          pthread_cond_t  
-
-
-typedef struct hai_agent_t {
+typedef struct hai_kernel_t {
   // --- agent basic information --------
-  void*       map_kernel;
-  char*       map_kernel_src;
+  void*       kernel_bin;
+  char*       kernel_src;
   map_key_t   in_key;
   map_key_t   out_key;
   
