@@ -42,12 +42,12 @@ typedef struct {
 // key_node_t
 // ----------------------------------------------------------
 typedef struct {
-  uid_t			uid;        // unique id for the key
-  bin_node_t*	phead;      // head of the link list
-  bin_node_t*	ptail;      // tail of the link list
-  uint32_t      nobj;       // number of object in the node
-  size_t        ssize;      // size of the object in bytes
-  mutex_t    	mutex;
+  uid_t			    uid;        // unique id for the key
+  bin_node_t*	    phead;      // head of the link list
+  bin_node_t*	    ptail;      // tail of the link list
+  uint32_t          nobj;       // number of object in the node
+  size_t            ssize;      // size of the object in bytes
+  thread_mutex_t    mutex;      // thread mutex
 } key_node_t;
 
 // ----------------------------------------------------------
@@ -57,6 +57,7 @@ typedef struct {
   key_node_t*     nodes;    // key node array
   uint32_t        maxkey;   // maximum number of keys in the table
   uint32_t        nkey;     // number of keys in the table
+  uint64_t        reg_size; // registered size of data in the table
 } key_table_t;
 
 typedef key_table_t hai_key_table_t;
@@ -82,7 +83,7 @@ int hai_keytable_init_(key_table keytable, uint32_t size) {
     keytable -> nodes[i].phead = NULL;
     keytable -> nodes[i].ptail = NULL;
     keytable -> nodes[i].size = NULL;
-    hai_thread_init_mutex(keytable -> nodes[i].mutex);
+    thread_init_mutex(keytable -> nodes[i].mutex);
   }
   keytable -> capacity = size;
   keytable -> size = 0u;
