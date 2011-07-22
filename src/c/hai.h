@@ -16,42 +16,39 @@
 #ifndef HAI_H
 #define HAI_H
 
-#include "agent.h"
-#include "common.h"
-#include "mem.h"
-#include "ocl.h"
+#include <HAI/split.h>
+#include <HAI/scheduler.h>
+#include <HAI/common.h>
 
-
-inline int haiocl_init() {
+inline
+int HAI_init() {
 }
 
-inline int haiocl_exit() {
+inline
+int HAI_release() {
   exit(1);
 }
 
 // ------------------------------------------------------------
 // global variables
 // ------------------------------------------------------------
-typedef struct g_state {  
-  hai_agent_t*       agents;                  // all the agents pointers
-  hai_key_table_t  	 keytable;                // all the map keys
+typedef struct {  
   hai_scheduler_t* 	 scheduler;               // scheduler pointer
-  hai_qsplit_t*      splits_queue;            // splits queues
-
-  uint32_t           kt_capacity;             // key table length
+  hai_queue_t*       splits_queue;            // splits queues
+  hai_kernel_t       kernels[HAI_MAX_NKERNEL];
+  uint32_t           klen;
 } g_state_t;
 
-inline int g_state_init(g_state_t* p) {
+inline 
+int g_state_init(g_state_t* p) {
   int ret;
-  ret = hai_keytable_init(p -> keytables);
-  CHK_RET(ret);
-
-  ret = hai_scheduler_init(p -> scheduler);
-  CHK_RET(ret);
-
-  return 0;
+  ret = HAI_scheduler_init(p -> scheduler);
+  p -> klen = 0;
+  
 }
 
 inline int g_state_release(g_state_t* p) {
 }
+
+
 #endif

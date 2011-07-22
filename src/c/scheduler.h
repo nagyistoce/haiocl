@@ -32,15 +32,17 @@ typedef struct {
   // -- Number of OpenCL env. ------------------------
   uint32_t         nPlatform;
   uint32_t         nDevice[OCL_MAX_PLATFORM];
-  uint32_t         nQueue[OCL_MAX_PLATFORM][HAI_MAX_DEVICE];
-  
+  uint32_t         nQueue[OCL_MAX_RESOURCE];
+  uint64_t         device_status;
+  thread_mutex_t   device_status_mutex;
+  uint32_t         nResource;
+
   // -- General information ---------------------------
-  thread_id_t     thread_id;
-  uint32_t        resource;
-  uint32_t        status;
-  thread_mutex_t  wmutex;
-  thread_cond_t   wcond;
-} ocl_scheduler_t;
+  thread_id_t     thread_id;  
+  uint32_t        scheduler_status;
+  thread_mutex_t  scheduler_mutex;
+  thread_cond_t   scheduler_cond;;
+} hai_scheduler_t;
 
 // ----------------------------------------------------------
 // hai_scheduler_init()
@@ -50,7 +52,7 @@ typedef struct {
 //  is to manage the splits allocated to different OpenCL devices.
 // ----------------------------------------------------------
 inline
-int ocl_scheduler_init(ocl_scheduler_t* scheduler) {
+int HAI_scheduler_init(ocl_scheduler_t* scheduler) {
   cl_int ret;
   cl_int i, j;
   char buf[1024];
@@ -60,6 +62,7 @@ int ocl_scheduler_init(ocl_scheduler_t* scheduler) {
   ASSERT_OCL_RET(ret, scheduler);
   logme("%d platforms fetched.", scheduler -> nPlatform);
   
+  scheduler -> nResource = 0;
   for (i = 0; i < scheduler -> nPlatform; i ++) {
     clGetPlatformInfo(scheduler -> platform_id[i], 
                       CL_PLATFORM_NAME, 1024, buf, NULL);
@@ -73,6 +76,7 @@ int ocl_scheduler_init(ocl_scheduler_t* scheduler) {
     ASSERT_OCL_RET(ret, scheduler);
 
     logme("Platform %d : %d devices is found.\n", i, scheduler -> nDevice[i]);
+    nResource += scheduler -> nDevice[i];
 
     // create context
     scheduler -> context[i] = clCreateContext(NULL, scheduler -> nDevice, 
@@ -103,48 +107,28 @@ int ocl_scheduler_init(ocl_scheduler_t* scheduler) {
 // ocl_scheduler_release()
 // ----------------------------------------------------------
 inline 
-int ocl_scheduler_release(ocl_sheduler_t* scheduler) {
+int HAI_scheduler_release(ocl_sheduler_t* scheduler) {
 }
 
 inline
-int is_scheduler_stopped(hai_scheduler_t* scheduler) {
-  return scheduler -> status == 1;
-}
-
-inline
-int chk_condition() {
-}
-
-inline
-int hai_scheduler_run(ocl_scheduler_t* sheduler) {
+int HAI_scheduler_run() {
   uint32_t rid;
-  bin_node_t* bnode;
+  hai_split_t* split;
+  
+  hai_scheduler_t* scheduler = g_state -> scheduler;
+
   pthread_mutex_lock( scheduler -> wmutex );
   
-  while ( should_i_stop(scheduler) ) {
-    pthread_cond_wait( &(scheduler -> wcond), &(scheduler -> wmutex) );
-        
-    rid = hai_scheduler_get_empty_resource( scheduler );
-    bnode = hai_keytable_pop(uid);
-    hai_scheduler_go(rid, bnode);
-    hai_scheduler_disable(rid);
+  while ( scheduler -> status & HAI_SCHEDULER_STOP ) {
+    pthread_cond_wait( &(scheduler -> scheduler_cond), 
+                       &(scheduler -> scheduler_mutex) );
+    
+    rid = NEXT_EMPTY_RESOURCE( scheduler -> resource );
+    split = hai_queue_pop();
+    enqueue(split, rid);
+    mark_resource( scheduler -> resource, rid );
   }
   return 0;
 }
-
-inline
-void hai_scheduler_wait() {
-}
-
-/**
- * Query available OpenCL platforms.
- */
-static int hai_query_platform(cl_platform_id, ocl_platform_t*);
-
-/**
- * Query available OpenCL devices from platform.
- */
-static int hai_query_device(cl_platform_id, cl_device_id, ocl_device_t*);
-
 
 #endif
