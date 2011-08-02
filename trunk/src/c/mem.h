@@ -91,7 +91,13 @@ int hai_keytable_init_(key_table keytable, uint32_t size) {
 }
 
 // ----------------------------------------------------------
-// hai_keytable_init
+// hai_keytable_search()
+//
+// Search the node pointer based on uid.
+// Parameters:
+//   uid - the uid of the key
+// Return:
+//   pointer to the key node.
 // ----------------------------------------------------------
 #define hai_keytable_search(x) hai_keytable_search_(x, g_state -> keytable)
 inline
