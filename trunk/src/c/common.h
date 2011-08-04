@@ -26,33 +26,47 @@
 #define HAI_DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
 #endif
 
+
 // ------- log & error -------------
-#ifdef _DEBUG
-#define HAI_LOG(format, msg) \
-  log_("Log", format, msg)
+#ifdef HAI_DEBUG
+#define MAKE_NAME(...) #__VA_ARGS__
 
-#define log_(type, format, msg)                   \
-  printf("#type %s, %4d: ", __FILE__, __LINE__);  \
-  printf(format, msg);                            \
-  puts("");
-
+#define HAI_log(format, ...) \
+  fprintf(stdout, MAKE_NAME(%s, %d, format), __FILE__, __LINE__, ...)
 #else
-#define HAI_LOG(format, msg)
+#define HAI_log(format, ...)
 #endif
-
-#define CHK_RET(ret) \
-	if (ret != CL_SUCCESS) \
-		HAI_error(ret)
 
 // ----------------------------------------------------------
 // HAI_error
 // ----------------------------------------------------------
+inline
 void HAI_error(int errorno) {
 }
 
 // ----------------------------------------------------------
-// HAI_register_kernel
+// HAI_read_source_file
+//
+// Read kernel source from file on the disk.
 // ----------------------------------------------------------
-char* HAI_read_source_from_file(const char* filename, size_t* size) {
+char* HAI_read_source_file(const char* filename, size_t* size) {
+	FILE *fp;
+	struct stat fp_stat;
+	if ((fp = fopen(filename, "r")) == NULL) {
+		HAI_log("Can't find the file.");
+		return NULL;
+	}
+	
+	if (fstat(fileno(fp), &fp_stat) < 0) {
+		HAI_log("fstat failed.");
+		return NULL;
+	}
+	
+	size_t fp_size = fp_stat.st_size;
+	char* buf = (char*)malloc(fp_size);
+	*size = fread(buf, fp_size, 1, fp);
+	fclose(fp);
+	return buf;
 }
+
 #endif

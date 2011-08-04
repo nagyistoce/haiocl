@@ -2,16 +2,28 @@
 #include <HAI/hai.h>
 
 inline
-size_t readInputFromFile(input_t* data, const char* filename) {
+int* readInputFromFile(const char* filename, int* n) {
+	FILE* fp = fopen(filename, "r");
+	if (fp == NULL) {
+		printf("can't open the file.\n");
+		return NULL;
+	}
+	
+	struct stat fp_stat;
+	fstat(fileno(fp), &fp_stat);
+	*n = fp_stat.st_size / sizeof(int);
+	int* buf = (int*)malloc(fp_stat.st_size);
+	fread(buf, sizeof(int), n, fp);
+	fclose(fp);
 }
 
 uint32_t setupSortKernelFromFile(hai_buffer_t* output) {
   const char* sort_src_filename = "sort.cl";
-  char sort_src[10240];
-  size_t sort_size = readTextFromFile(sort_src, sort_src_filename);
+  size_t sort_len;
+  char* sort_src = HAI_read_source_file(sort_src_filename, &sort_len);
   
   // generate the notifier
-  hai_notify_t notifier = HAI_notify_to_buffer(output);
+  hai_notify_t notifier = HAI_notify_buffer(output);
  
   // setup kernel prop
   HAI_kernel_prop_t sort_prop;
@@ -23,7 +35,7 @@ uint32_t setupSortKernelFromFile(hai_buffer_t* output) {
   sort_prop.max_input_size = sort_prop.single_output_size = sizeof(int) * 100;
 
   // register the kernel
-  HAI_register_kernel(sort_src, sort_size, sort_prop, notifier, &kid);
+  HAI_register_kernel(sort_src, sort_len, sort_prop, notifier, &kid);
   return kid;
 }
 
@@ -32,13 +44,12 @@ int main(int argc, char **argv) {
   int* sort_input; 
   uint32_t sort_id;
   size_t nbyte;
-  char* test_input;
   hai_buffer_t test_output;
 
-  test_input = readInputFromFile("testInput.txt", &size);
+  char *test_input = readInputFromFile("testInput.txt", &nbyte);
   HAI_init_buffer(&test_output, size);
   
-  sort_id = setupSortKernelFromFile(test_output, size);
+  sort_id = setupSortKernelFromFile(test_output);
   
   HAI_init();
   HAI_run();
