@@ -1,5 +1,4 @@
 /*================================================================================
- *
  * common.h
  *
  * Author:
@@ -17,29 +16,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// ------- agent.h -------------------
-#define HAI_MAX_INIT_LEN    100
-#define HAI_MAX_KERNEL_LEN 10240
-#define HAI_MAX_AGENTS     20
-
-// ------- mem.h -------------------
-#ifndef DEFAULT_KEYTABLE_SIZE
-#define DEFAULT_KEYTABLE_SIZE 1024           // 1K initial key size length
-#endif
-
-#define HAI_DATA_TRUNK_LEN 41960
-#ifndef HAI_DEFAULT_NODE_SIZE 10240          // 10K for each node size
-#endif
-
 // ------- ocl.h -------------------
-#define HAI_OCL_MAX_DEVICE     10
-#define HAI_OCL_MAX_QUEUE      10
-#define HAI_OCL_MAX_CONTEXT    10
-#define HAI_OCL_SPLITS_SIZE    30
+#define HAI_MAX_PLATFORM	   10
+#define HAI_MAX_DEVICE     	   10
+#define HAI_MAX_QUEUE          10
 
 // ------- general ----------------
-#ifndef DEFAULT_DEVICE_TYPE
-#define DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
+#ifndef HAI_DEFAULT_DEVICE_TYPE
+#define HAI_DEFAULT_DEVICE_TYPE    CL_DEVICE_TYPE_GPU
 #endif
 
 // ------- log & error -------------
@@ -56,6 +40,19 @@
 #define HAI_LOG(format, msg)
 #endif
 
-#define CHK_RET(ret)
+#define CHK_RET(ret) \
+	if (ret != CL_SUCCESS) \
+		HAI_error(ret)
 
+// ----------------------------------------------------------
+// HAI_error
+// ----------------------------------------------------------
+void HAI_error(int errorno) {
+}
+
+// ----------------------------------------------------------
+// HAI_register_kernel
+// ----------------------------------------------------------
+char* HAI_read_source_from_file(const char* filename, size_t* size) {
+}
 #endif

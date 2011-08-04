@@ -14,15 +14,43 @@
 #ifndef HAI_SPLIT_H
 #define HAI_SPLIT_H
 
+typedef uint32_t kid_t;		// kernel id type
+
 // ----------------------------------------------------------
-// key_table_t
+// Thread-safe Buffer type
 // ----------------------------------------------------------
 typedef struct {
-  hai_kernel_prop_t kernel_prop;
-  cl_kernel*        kernel;
-  char*             kernel_src;
-  size_t            size;
-  void*             fn_notify;
+  char*		data;
+  size_t	offset;
+  mutex_t	mutex;
+  size_t	size;
+  bool		shared;
+} hai_buffer_t;
+
+int hai_read_buffer(hai_buffer_t* p, size_t size);
+int hai_write_buffer(hai_buffer_t* p, char* np, size_t size);
+
+// ----------------------------------------------------------
+// Notifier type
+// ----------------------------------------------------------
+typedef struct {
+  uint32_t	kid;
+  void*		output;
+  uint32_t	offset;
+} hai_notify_t;
+
+hai_notify_t hai_register_to_kernel(kid_t kid, void* p, size_t size);
+hai_notify_t hai_register_to_buffer();
+
+// ----------------------------------------------------------
+// kernel type
+// ----------------------------------------------------------
+typedef struct {
+  hai_kernel_prop_t kernel_prop;	// kernel property
+  cl_kernel*        kernel;			// kernel object
+  char*             kernel_src;		// kernel source
+  size_t            size;			// source size
+  hai_notify_t      fn_notify;		// notifier
 } hai_kernel_t;
 
 // ----------------------------------------------------------
@@ -42,69 +70,15 @@ typedef struct {
 } hai_kernel_prop_t;
 
 // ----------------------------------------------------------
-// key_table_t
+// HAI_register_kernel
 // ----------------------------------------------------------
 inline
 uint32_t HAI_register_kernel(char* src, 
-                             size_t size, 
-                             HAI_kernel_prop_t prop, 
-                             uint32_t* kid) {
+							 size_t size, 
+							hai_kernel_prop_t prop, 
+							hai_notify_t notifier, 
+							kid_t* kid) {
 }
 
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-typedef struct {
-  uint32_t   kid;
-  char*      in_data;
-  char*      out_data;
-  size_t     in_size;
-  size_t     out_size;
-} hai_split_t;
-
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-typedef struct {
-  hai_queue_node_t* next;
-  hai_split_t       split;
-} hai_queue_node_t;
-
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-typedef struct {
-  hai_queue_node_t* head;
-  hai_queue_node_t* tail;
-  uint32_t          len;
-  thread_mutex_t    qmutex;
-} hai_queue_t;
-
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-inline
-int HAI_queue_init(HAI_queue_t* queue) {
-  queue -> head = queue -> tail = NULL;
-  queue -> len = 0;
-  queue -> qmutex = thread_create_mutex();
-  return 0;
-}
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-
-inline
-int hai_queue_push( hai_queue_t* queue, 
-                    hai_split_t* split) {
-}
-
-// ----------------------------------------------------------
-// key_table_t
-// ----------------------------------------------------------
-inline
-int hai_split_t* hai_queue_pop( hai_queue_t* queue,
-                                hai_split_t** split) {
-}
 
 #endif
