@@ -16,9 +16,10 @@
 
 
 #include <CL/opencl.h>
+#include <HAI/hai.h>
 
 
-typedef struct {
+struct hai_scheduler_t {
   // -- OpenCL Env. IDs -------------------------------
   cl_platform_id   platform_id[HAI_MAX_PLATFORM];
   cl_platform      platforms[HAI_MAX_PLATFORM];
@@ -33,16 +34,13 @@ typedef struct {
   uint32_t         nPlatform;
   uint32_t         nDevice[OCL_MAX_PLATFORM];
   uint32_t         nQueue[OCL_MAX_RESOURCE];
-  uint64_t         device_status;
-  thread_mutex_t   device_status_mutex;
-  uint32_t         nResource;
+  uint64_t         dev_status;
+  uint32_t         nres;
 
   // -- General information ---------------------------
-  thread_id_t     thread_id;  
-  uint32_t        scheduler_status;
-  thread_mutex_t  scheduler_mutex;
-  thread_cond_t   scheduler_cond;;
-} hai_scheduler_t;
+  uint32_t        status;
+  sem_t			  sch_sem;
+} ;
 
 // ----------------------------------------------------------
 // hai_scheduler_init()
@@ -59,24 +57,24 @@ int HAI_scheduler_init(ocl_scheduler_t* scheduler) {
 
   ret = clGetPlatformIDs(HAI_MAX_PLATFORM, scheduler -> platform_id, 
                          scheduler -> &nPlatform);
-  ASSERT_OCL_RET(ret, scheduler);
-  logme("%d platforms fetched.", scheduler -> nPlatform);
+  CHK_RET(ret, scheduler);
+  HAI_log("%d platforms fetched.", scheduler -> nPlatform);
   
   scheduler -> nResource = 0;
   for (i = 0; i < scheduler -> nPlatform; i ++) {
     clGetPlatformInfo(scheduler -> platform_id[i], 
                       CL_PLATFORM_NAME, 1024, buf, NULL);
-    logme("Platform %d : %s\n", i, buf);
+    HAI_log("Platform %d : %s\n", i, buf);
     
     ret = clGetDeviceIDs(scheduler -> platform_id[i], 
                          CL_DEVICE_TYPE_ALL, 
                          HAI_MAX_DEVICE, 
                          scheduler -> device_id[i],
                          scheduler -> nDevice + i);
-    ASSERT_OCL_RET(ret, scheduler);
+    CHK_RET(ret);
 
-    logme("Platform %d : %d devices is found.\n", i, scheduler -> nDevice[i]);
-    nResource += scheduler -> nDevice[i];
+    HAI_log("Platform %d : %d devices is found.\n", i, scheduler -> nDevice[i]);
+    nres += scheduler -> nDevice[i];
 
     // create context
     scheduler -> context[i] = clCreateContext(NULL, scheduler -> nDevice, 
@@ -84,7 +82,7 @@ int HAI_scheduler_init(ocl_scheduler_t* scheduler) {
                                               context_notify, 
                                               i, 
                                               &ret);
-    ASSERT_OCL_RET(ret, scheduler);
+    CHK_RET(ret);
     
     for (j = 0; j < scheduler -> nDevice[i]; j ++) {
       clGetDeviceInfo(scheduler -> device_id[i][j], 
@@ -92,13 +90,16 @@ int HAI_scheduler_init(ocl_scheduler_t* scheduler) {
                       1024, 
                       buf, 
                       NULL);
-      logme("VENDOR: %s\n", buf);
+      HAI_log("VENDOR: %s\n", buf);
       scheduler -> queue[i][j] = clCreateCommandQueue(scheduler -> context[i], 
                                                       scheduler -> device_id[i], 
                                                       OCL_PROFILE_PROPERTY, 
                                                       &ret);
-      ASSERT_OCL_RET(ret, scheduler);
+      CHK_RET(ret);
     }
+	
+	// initialize the semaphores
+	sem_init(&(scheduler -> sch_sem), 0, nres);
   }
   return 0;
 }
@@ -106,10 +107,83 @@ int HAI_scheduler_init(ocl_scheduler_t* scheduler) {
 // ----------------------------------------------------------
 // ocl_scheduler_release()
 // ----------------------------------------------------------
+#define HAI_scheduler_release() HAI_scheduler_release_(g_state -> scheduler)
 inline 
-int HAI_scheduler_release(ocl_sheduler_t* scheduler) {
+int HAI_scheduler_release_(ocl_sheduler_t* scheduler) {
+	for (int i = 0; i < nPlatform; i ++) {
+		for (int j = 0; j < nDevice[i]; j ++)
+			clReleaseCommandQueue(queue[i][j]);
+		clReleaseContext(context[i]);
+		
+	sem_destroy(&(scheduler -> sch_sem));
+	return 0;
 }
 
+// ----------------------------------------------------------
+// ocl_enqueue_split()
+// ----------------------------------------------------------
+#define HAI_enqueue_split(x) HAI_enqueue_split_(g_state -> scheduler, x)
+inline 
+int HAI_enqueue_split_(ocl_sheduler_t* scheduler, hai_split_t split) {
+	
+}
+
+// ----------------------------------------------------------
+// HAI_scheduler_wait()
+// ----------------------------------------------------------
+#define HAI_scheduler_wait() HAI_scheduler_wait(g_state -> scheduler)
+
+inline
+void HAI_scheduler_wait_(hai_scheduler_t* scheduler) {
+	sem_wait(&(scheduler -> sch_sem))
+}
+
+// ----------------------------------------------------------
+// HAI_next_resoure()
+// ----------------------------------------------------------
+#define HAI_next_resource() HAI_next_resource(g_state -> scheduler)
+
+inline
+int HAI_next_resource_(hai_scheduler_t* scheduler) {
+	for (int i = 0; i < 64u; i ++) {
+		if (scheduler -> dev_status & (1u << i))
+			return i;
+	return -1;
+}
+
+// ----------------------------------------------------------
+// HAI_mask_resource()
+// ----------------------------------------------------------
+#define HAI_mask_resource(x) HAI_set_resource(g_state -> scheduler, x, 1)
+#define HAI_unmask_resource(x) HAI_set_resource(g_state -> scheduler, x, 0)
+
+static inline
+void HAI_set_resource(hai_scheduler* scheduler, int p, bool v) {
+	if (v)
+		scheduler -> dev_status |= 1u << p;
+	else
+		scheduler -> dev_status ^= 1u << p;
+}
+
+// ----------------------------------------------------------
+// HAI_mask_resource()
+// ----------------------------------------------------------
+inline
+int HAI_next_resource_(hai_scheduler_t* scheduler) {
+	for (int i = 0; i < 64u; i ++) {
+		if (dev_status & (1u << i))
+			return i;
+	return -1;
+}
+
+static inline
+bool is_scheduler_stopped(hai_scheduler_t* scheduler) {
+	return scheduler -> status & SCHEDULER_STOPPED;
+}
+
+// ----------------------------------------------------------
+// HAI_scheduler_run()
+// ----------------------------------------------------------
 inline
 int HAI_scheduler_run() {
   uint32_t rid;
@@ -117,16 +191,20 @@ int HAI_scheduler_run() {
   
   hai_scheduler_t* scheduler = g_state -> scheduler;
 
-  pthread_mutex_lock( scheduler -> wmutex );
-  
-  while ( scheduler -> status & HAI_SCHEDULER_STOP ) {
-    pthread_cond_wait( &(scheduler -> scheduler_cond), 
-                       &(scheduler -> scheduler_mutex) );
-    
-    rid = NEXT_EMPTY_RESOURCE( scheduler -> resource );
-    split = hai_queue_pop();
-    enqueue(split, rid);
-    mark_resource( scheduler -> resource, rid );
+  while ( is_scheduler_stopped(scheduler) ) {
+	HAI_queue_wait();
+	if (is_scheduler_stopped(scheduler))
+		break;
+	
+	split = hai_queue_pop();
+	
+	hai_scheduler_wait();
+    if (is_scheduler_stopped())
+		break;
+		
+    rid = HAI_next_resource();
+	HAI_mask_resource(rid);
+    HAI_enqueue_split(split, rid);
   }
   return 0;
 }

@@ -33,21 +33,21 @@ int HAI_release() {
 // global variables
 // ------------------------------------------------------------
 typedef struct {  
-  hai_scheduler_t* 	 scheduler;               // scheduler pointer
-  hai_queue_t*       splits_queue;            // splits queues
-  hai_kernel_t       kernels[HAI_MAX_NKERNEL];
-  uint32_t           klen;
+  hai_scheduler_t* scheduler;               // scheduler pointer
+  hai_queue_t*     split_queue;             // splits queues
+  hai_kernel_t     kernel[HAI_MAX_KERNEL];  // kernel array 
+  uint32_t         nkernel;					// number of kernels
 } g_state_t;
 
 inline 
 int g_state_init(g_state_t* p) {
   int ret;
   ret = HAI_scheduler_init(p -> scheduler);
-  p -> klen = 0;
-  
+  p -> nkernel = 0;
 }
 
-inline int g_state_release(g_state_t* p) {
+inline 
+int g_state_release(g_state_t* p) {
 }
 
 
